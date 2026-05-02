@@ -91,11 +91,26 @@ Khai thác hàm:
 
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/8133437e-06c7-45c9-982f-fdac32b7e376" />
 
+#### 4. Viết 01 Inline Table-Valued Function
+**Yêu cầu:** Trả về danh sách sách thuộc một thể loại cụ thể dựa trên tên thể loại.
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/62102bae-8a02-43b9-9e32-74d01c116fc5" />
+
+Khai thác hàm:
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/fd95131e-05bc-4e1a-a277-68f6fe61f44c" />
+
+#### 5. Viết 01 Multi-statement Table-Valued Function
+**Yêu cầu:** Phân loại độc giả dựa trên số tiền ký quỹ. (Dưới 50k: Bronze, 50k-150k: Silver, trên 150k: Gold)
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/5e9c3d38-2e22-485a-b7b0-b6f03621329f" />
+
+Khai thác hàm:
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/2b6cb556-b559-4c19-a834-31c10f349ab4" />
 
 
-
-
-
+### III. Xây dựng Store Procedure
 
 
 
