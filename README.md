@@ -1,6 +1,20 @@
-# Bài tập môn Hệ quản trị cơ sở dữ liệu - TE560, Lớp: K59KMT
+# Bài tập môn Hệ quản trị cơ sở dữ liệu-TEE560, Lớp: 59KMT
 ## YÊU CẦU BÀI TẬP 
-### I. Thiết kế và Khởi tạo Cấu trúc Dữ liệu
+### Phần mở đầu:
+- Thông tin cá nhân: Vũ Tuấn Đạt
+- MSSV: K235480106105
+- Yêu cầu đầu bài: Thiết kế và Khởi tạo Cấu trúc Dữ liệu quản lý thư viện
+- Cách làm:
+    - Giai đoạn 1 (Thiết kế): Phân tích thực thể, xác định các kiểu dữ liệu tối ưu (Unicode cho tên sách, Money cho giá tiền). Thiết lập sơ đồ quan hệ đảm bảo tính toàn vẹn dữ liệu thông qua Primary Key và Foreign Key.
+
+   - Giai đoạn 2 (Logic hóa): Sử dụng các System Functions (như DATEDIFF, GETDATE, FORMAT) để làm nền tảng, sau đó xây dựng các User-Defined Functions riêng để đóng gói các công thức nghiệp vụ đặc thù của thư viện.
+
+   - Giai đoạn 3 (Tương tác): Viết các Stored Procedures để chuẩn hóa việc nhập liệu, đảm bảo dữ liệu đi vào hệ thống luôn đi qua các bước kiểm tra (Validation) nghiêm ngặt.
+
+   - Giai đoạn 4 (Tự động hóa): Thiết lập Triggers để đồng bộ dữ liệu giữa các bảng (ví dụ: Nhật ký nhập kho). Đồng thời, thử nghiệm lỗi đệ quy để hiểu rõ giới hạn của hệ thống (mức lồng nhau tối đa 32 cấp).
+
+   - Giai đoạn 5 (Tối ưu): Thực hiện duyệt dữ liệu bằng Cursor để xử lý các bài toán tuần tự, sau đó đối chiếu với giải pháp Set-based (dùng CASE WHEN) để chứng minh hiệu năng vượt trội của việc xử lý tập hợp trong SQL.
+### Phần I. Thiết kế và Khởi tạo Cấu trúc Dữ liệu
 
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/9132c81c-dd91-43e4-a149-31439af1e7ca" />
 Tạo Database mới với tên QuanLyThuVien_K235480106105.
@@ -30,7 +44,7 @@ Khởi tạo 3 bảng thành công
 
 - INSERT dữ liệu cho 3 bảng
 
-### II. Xây dựng Function
+### Phần II. Xây dựng Function
 
 #### 1. Các loại Function Built-in trong SQL Server
 - Hàm có sẵn như:
@@ -57,21 +71,29 @@ Khởi tạo 3 bảng thành công
     a) Scalar Function (Hàm vô hướng)
   
       - Trả về: Một giá trị đơn duy nhất (số, chuỗi, ngày tháng).
+  
       - Khi nào dùng: Khi ta cần thực hiện một phép tính cụ thể cho từng dòng dữ liệu.4
+  
       - Ví dụ: Tính tổng giá trị một đầu sách (Giá x Số Lượng).
 
     b) Inline Tabe-Valued Function (Hàm bảng nội tuyến)
 
       - Trả về: Một tập hợp kết quả dưới dạng bảng (Result set).
+  
       - Đặc điểm: Chỉ chứa duy nhất một câu lệnh RETURN (SELECT...) không có khối BEGIN...END.
+  
       - Khi nào dùng: Khi ta muốn tạo ra một "View có tham số" để lọc dữ liệu nhanh chóng.
+  
       - Ví dụ: Lấy danh sách toàn bộ sách thuộc thể loại "Kinh tế".
 
   c) Multi-statement Table-Valued Function (Hàm bảng đa câu lệnh)
 
       - Trả về: Một bảng dữ liệu có cấu trúc được định nghĩa sẵn.
+  
       - Đặc điểm: Có khối BEGIN...END, cho phép khai báo biến, sử dụng IF...ELSE, WHILE và chèn dữ liệu vào một biến bảng (table variable) trước khi trả về.
+  
       - Khi nào dùng: Khi logic xử lý quá phức tạp, không thể giải quyết chỉ bằng một câu SELECT duy nhất.
+  
       - Ví dụ: Xếp hạng độc giả dựa trên nhiều tiêu chí (tiền ký quỹ, số lần mượn, tuổi tác,...).
 - Tại sao cần tự viết hàm khi đã có System Function
 
@@ -110,12 +132,123 @@ Khai thác hàm:
 <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/2b6cb556-b559-4c19-a834-31c10f349ab4" />
 
 
-### III. Xây dựng Store Procedure
+### Phần III. Xây dựng Store Procedure
+#### 1. Stored Procedure có sẵn trong SQL Sever (System SP)
 
+System Stored Procedures là các thủ tục được Microsoft viết sẵn, lưu trữ trong database master và bắt đầu bằng tiền tố sp_ chúng giúp quản trị viên hệ thống quản lý databasae nhanh chóng.
 
+Một vài System SP đặc sắc:
 
+- sp_help: Cung cấp thông tin chi tiết về một đối tượng (bảng, cột ràng buộc, dữ liệu).
+      - Cách dùng: EXEC sp_help 'Sach';
+- sp_rename: Dùng để đổi tên một đối tượng (như bảng hoặc cột) mà không cần xóa đi tạo lại.
+      - Cách dùng: EXEC sp_rename 'TenBangCu', 'TenBangMoi';
+- sp_helpdb: Hiển thị thông tin về các database đang có trên server hoặc thông tin chi tiết của một DB cụ thể.
+      - Cách dùng: EXEC sp_helpdb 'QuanLyThuVien_K235480106105';
 
+  #### 2. Thực hành viết SP
 
+  - SP thực hiện INSERT dữ liệu có kiểm tra logic
 
+  **Yêu cầu:** Tạo SP để nhập thêm sách mới. Kiểm tra nếu GiaTien nhỏ hơn hoặc bằng 0 thì không cho nhập và báo lỗi.
 
+ <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/369fecac-313b-4c4d-91ce-22d009f18816" />
 
+Trường hợp giá lỗi:
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/f860d8e7-0daf-4a3f-9ee2-5c5cfacef009" />
+
+Trường hợp không lỗi:
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/a15c029f-2a94-4cdf-b145-a53bfa068867" />
+
+- SP sử dụng tham số OUTPUT
+
+**Yêu cầu:** Tính tổng số lượng sách đang có trong thư viện và trả về qua tham số OUTPUT.
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/51aeb43c-c899-4038-8b18-9b4ffc6b4d66" />
+
+Kết quả:
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/636e434e-826a-4ccc-b342-fb59e362425b" />
+
+- SP trả về tập kết quả (Result set) từ lệnh SELECT join nhiều bảng
+
+**Yêu cầu:** Xuất báo cáo danh sách bao gồm: Mã sách, Tên sách, Tên thể loại và Giá tiền.
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/e3d1f266-72cd-42e4-bbeb-2337da3826f0" />
+
+Kết quả:
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/9a1f2ab8-1d72-42ce-910b-5f1dca413566" />
+
+### Phần IV: Trigger và Xử lý logic nghiệp 
+
+1. Viết 01 Trigger tự động xử lý logic nghiệp vụ thực tế
+
+Giả sử: Khi thư viện nhập thêm một lượng sách mới vào bảng [Sach] (bảng A), chúng ta cần ghi lại lịch sử nhập kho và một bảng khác gọi là [NhatKyNhapKho] (bảng B) để tiện theo dõi sau này.
+
+- Bước 1: Tạo bảng B (NhatKyNhapKho)
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/6d36620f-be87-4717-bb62-240da73037f4" />
+
+- Bước 2: Tạo Trigger trên bảng [Sach]
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/fecc0366-822b-4f27-8c53-2bcee2c32c2f" />
+
+Trigger này sử dụng bảng ảo inserted (chứa dữ liệu vừa được thêm vào). Ngay sau khi thêm sách mới, nó sẽ tự động "copy" thông tin đó và bảng nhật ký.
+
+2. Thử nghiệm Trigger thực tế
+
+Giả thuyết đưa ra:
+
+- Trigger 1 (Trên bảng A): Khi insert vào bảng A, hãy update bảng B.
+- Trigger 2 (Trên bảng B): Khi bảng B được update, hãy update ngược lại bảng A.
+
+Nhập 1 cuốn sách mới
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/e6eec9d2-f87d-4938-97a4-ba7a90b76eef" />
+
+Kiểm tra bảng nhật ký
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/2c967d07-e47b-4306-8910-bd0477e7ec7e" />
+
+Ta sẽ thấy một dòng mới trong bảng NhatKyNhapKho với MaSach là 'S999' và SoLuongMoi là 10, dù không hề viết lệnh insert vào bảng này.
+
+3. Thử nghiệm Trigger vòng lặp
+
+Ta thử thêm một cuốn sách khác để kích hoạt chuỗi: Insert Sach --> Update DocGia --> Update Sach...
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/67b56aaa-c9bc-4d09-bb44-8965e0f8111c" />
+
+Hệ thống đã đếm ngược trigeer A gọi B, B gọi A... lặp đi lặp lại đến lần thứ 32 thì SQL Sever "chóng mặt" nên đã tự ngắt lệnh để bảo vệ máy tính không bị treo. Đây gọi là hiện tượng Recursive Triggers (Trigger đệ quy). Nếu không kiểm soát tốt, nó sẽ gây lỗi logic nghiệm trọng hoặc làm cạn kiệt tài nguyên máy chủ.
+
+- Nhận xét: Ta cần hạn chế tối đa việc viết các trigger tác động chéo lên nhau theo vòng tròn. Trigger nên ngắn gọn, đơn giản và tránh gây ra các tác động dây chuyền quá phức tạp.
+
+### Phần V: Cursor và Duyệt dữ liệu 
+
+**Bài toán**: Duyệt qua danh sách sách, kiểm tra "thâm niên" và "số lượng tồn". Nếu sách quá cũ (trên 800 ngày) và còn nhiều hàng, hãy in ra thông báo "Cần xả kho ngay"; nếu sách mới và sắp hết hàng, in "Cần nhập thêm".
+
+1. Sử dụng CURSOR để xử lý từng bản ghi
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/39f6a98b-63ea-4277-ad1e-1dd5535adf16" />
+
+Check thời gian chạy
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/f19cb165-792e-42a6-b3cb-76001dcf510b" />
+
+2. Sử dụng SET-BASED (Xử lý tập hợp)
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/ecb2c023-1cf2-4124-b32f-312b176f11a6" />
+
+Check thời gian chạy
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/c63ebd0c-2709-4561-80b1-0dbab62a0146" />
+
+- Nhật xét: Cách không dùng Cursor (Set-based) luôn nhanh hơn gấp nhiều lần. Vì SQL Sever được tối ưu hóa để xử lý bảng dữ liệu, việc dùng Cursor giống như thuê một chiếc xe tải nhưng chỉ để chở từng viên gạch một - rất lãng phí tài nguyên.
+
+3. Bài toán "Chỉ Cursor mới giải quyết được" 
+
+Thực tế, gần như mọi thứ đều có thể dùng SQL thuần (kết hợp với CTE hoặc Window Functions) để giải quyết. Tuy nhiên, bài toán Duyệt tồn kho theo phương pháp FIFO (First In - First Out) là cực kỳ khó nếu không có Cursor.
+
+Kịch bản: Thư viện có nhiều đợt nhập cuốn sách "Dắc Nhân Tâm" với giá khác nhau. Khi có người mượn làm mất sách và phải đền, bạn phải trừ dần số lượng vào từng đợt nhập (đợt nào nhập trước trừ trước).
+
+- Đợt 1: Nhập 10 cuốn (1/1/2024)
+- Đợt 2: Nhập 10 cuốn (1/2/2024)
+- Khách làm mất 12 cuốn.
+- Vì ta cần lấy 12 cuốn, trừ hết 10 cuốn của đợt 1, sau đó lấy số dư (2 cuốn) để trừ tiếp vào đợt 2. Hành động của dòng thứ 2 phụ thuộc hoàn toàn vào kết quả tính toán còn dư của dòng thứ 1. SQL thuần xử lý các dòng độc lập nên rất khó để "ghi nhớ" số dư này nếu không dùng Cursor để đi từng bước.
+
+Cursor là công cụ cuối cùng khi các giải pháp Set-based bế tắc, vì nó gây tốn CPU và làm khóa (lock) bảng dữ liệu lâu hơn bình thường.
